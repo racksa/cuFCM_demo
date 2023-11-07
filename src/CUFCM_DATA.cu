@@ -445,21 +445,11 @@ void box(Real *Y, int N, Real Lx, Real Ly, Real Lz){
 
 __device__
 void images(Real& x, Real boxsize){
-    // Real x_old = Real(10.0);
-    // x_old = x;
-
     x -= my_floor(x/boxsize)*boxsize;
 
     if(x == boxsize){
         x = Real(0.0);
     }
-
-    // if(x>=boxsize){
-    //     printf("-------- images,\
-    //             boxing %lf into [0 %lf] get %lf\n", 
-    //     x_old, boxsize, x);        
-    // }
-
 }
 
 

@@ -18,6 +18,10 @@
 
 
 int main(int argc, char** argv) {
+
+	///////////////////////////////////////////////////////////////////////////////
+	// Initialise test parameters
+	///////////////////////////////////////////////////////////////////////////////
 	#ifdef USE_REGULAR_FCM
 		std::string info_name = "./test/test_info/test_fcm_info";
 	#else
@@ -30,50 +34,54 @@ int main(int argc, char** argv) {
 		std::string ref_name = "./data/refdata/ref_data_N500000_rotation_1e-4.dat";
 	#endif
 
-	///////////////////////////////////////////////////////////////////////////////
-	// Initialise parameters
-	///////////////////////////////////////////////////////////////////////////////
+	/* Read fast FCM parameters*/
 	Pars pars;
 	Real values[100];
 	std::vector<std::string> datafile_names{3};
 	read_config(values, datafile_names, info_name.c_str());
 	parser_config(values, pars);
-
-	thrust::host_vector<Real> Yf_host(3*pars.N);						thrust::device_vector<Real> Yf_device(3*pars.N);
+	
+	/* Create postion and forces arrays */
+	// Replace this part with whatever your data is
+	thrust::host_vector<Real> Y_host(3*pars.N);							thrust::device_vector<Real> Y_device(3*pars.N);
 	thrust::host_vector<Real> F_host(3*pars.N);							thrust::device_vector<Real> F_device(3*pars.N);
 	thrust::host_vector<Real> T_host(3*pars.N);							thrust::device_vector<Real> T_device(3*pars.N);
 	thrust::host_vector<Real> V_host(3*pars.N);							thrust::device_vector<Real> V_device(3*pars.N);
 	thrust::host_vector<Real> W_host(3*pars.N);							thrust::device_vector<Real> W_device(3*pars.N);
-
+	
 	// ///////////////////////////////////////////////////////////////////////////////
 	// // Physical system initialisation
 	// ///////////////////////////////////////////////////////////////////////////////
-	read_init_data_thrust(Yf_host, datafile_names[0].c_str());
+	// This creates thrust arrays by reading Y, F, T from a file
+	read_init_data_thrust(Y_host, datafile_names[0].c_str());
 	read_init_data_thrust(F_host, datafile_names[1].c_str());
 	read_init_data_thrust(T_host, datafile_names[2].c_str());
 
-	Yf_device = Yf_host;
+	Y_device = Y_host;
 	F_device = F_host;
 	T_device = T_host;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Start repeat
 	///////////////////////////////////////////////////////////////////////////////	
+	// I am transferring to using thrust but the fast fcm solver still only takes 
+	// raw pointers, so I need to convert thrust arrays to raw pointers
 
-	/* Create FCM solver */
+	/* Create fast FCM solver */
 	cudaDeviceSynchronize();
 	FCM_solver solver(pars);
-	solver.assign_host_array_pointers(thrust::raw_pointer_cast(Yf_host.data()),  
+	solver.assign_host_array_pointers(thrust::raw_pointer_cast(Y_host.data()),  
 									  thrust::raw_pointer_cast(F_host.data()), 
 									  thrust::raw_pointer_cast(T_host.data()), 
 									  thrust::raw_pointer_cast(V_host.data()), 
 									  thrust::raw_pointer_cast(W_host.data()));
 
+	/* Repeat the computation to measure the average computation time */
 	for(int t = 0; t < pars.repeat; t++){
 		if(pars.prompt > 5){
 			std::cout << "\r====Computing repeat " << t+1 << "/" << pars.repeat;
 		}
-		solver.hydrodynamic_solver(thrust::raw_pointer_cast(Yf_device.data()), 
+		solver.hydrodynamic_solver(thrust::raw_pointer_cast(Y_device.data()), 
 								   thrust::raw_pointer_cast(F_device.data()), 
 								   thrust::raw_pointer_cast(T_device.data()), 
 								   thrust::raw_pointer_cast(V_device.data()), 
@@ -81,19 +89,22 @@ int main(int argc, char** argv) {
 	}
 	if(pars.prompt > 5){
 		printf("\nFinished loop:)\n");
+		solver.finish();
 	}
-	solver.finish();
+	
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Check error
 	///////////////////////////////////////////////////////////////////////////////
-    Real Yerror = -1, Verror = -1, Werror = -1;
-
-	Yf_host = Yf_device;
-	V_host = V_device;
-	W_host = W_device;
-
+	// You do not need this part if you are using fast fcm for your application
+	// because you wouldn't normally have a reference data to compare with
 	if (pars.checkerror == 1){
+		Real Yerror = -1, Verror = -1, Werror = -1;
+
+		Y_host = Y_device;
+		V_host = V_device;
+		W_host = W_device;
+
 		thrust::host_vector<Real> Y_validation(3*pars.N);
 		thrust::host_vector<Real> F_validation(3*pars.N);
 		thrust::host_vector<Real> T_validation(3*pars.N); 
@@ -106,7 +117,7 @@ int main(int argc, char** argv) {
 								  V_validation, 
 								  W_validation, ref_name.c_str());
 
-		Yerror = percentage_error_magnitude_thrust(Yf_host, Y_validation, pars.N);
+		Yerror = percentage_error_magnitude_thrust(Y_host, Y_validation, pars.N);
 		Verror = percentage_error_magnitude_thrust(V_host, V_validation, pars.N);
 		Werror = percentage_error_magnitude_thrust(W_host, W_validation, pars.N);
 

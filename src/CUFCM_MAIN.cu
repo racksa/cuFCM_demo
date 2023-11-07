@@ -18,6 +18,9 @@
 
 
 int main(int argc, char** argv) {
+	///////////////////////////////////////////////////////////////////////////////
+	// Initialise parameters
+	///////////////////////////////////////////////////////////////////////////////
 	#ifdef USE_REGULAR_FCM
 		std::string info_name = "./test/test_info/test_fcm_info";
 	#else
@@ -29,16 +32,16 @@ int main(int argc, char** argv) {
 	#elif ROTATION == 1
 		std::string ref_name = "./data/refdata/ref_data_N500000_rotation_1e-4.dat";
 	#endif
-
-	///////////////////////////////////////////////////////////////////////////////
-	// Initialise parameters
-	///////////////////////////////////////////////////////////////////////////////
+	
+	/* Read fast FCM parameters*/
 	Pars pars;
 	Real values[100];
 	std::vector<std::string> datafile_names{3};
 	read_config(values, datafile_names, info_name.c_str());
 	parser_config(values, pars);
 
+	/* Create postion and forces arrays */
+	// Replace this part with whatever your data is
 	thrust::host_vector<Real> Yf_host(3*pars.N);						thrust::device_vector<Real> Yf_device(3*pars.N);
 	thrust::host_vector<Real> F_host(3*pars.N);							thrust::device_vector<Real> F_device(3*pars.N);
 	thrust::host_vector<Real> T_host(3*pars.N);							thrust::device_vector<Real> T_device(3*pars.N);
@@ -48,9 +51,10 @@ int main(int argc, char** argv) {
 	///////////////////////////////////////////////////////////////////////////////
 	// Physical system initialisation
 	///////////////////////////////////////////////////////////////////////////////
-	read_init_data_thrust(Yf_host, pars.N, datafile_names[0].c_str());
-	read_init_data_thrust(F_host, pars.N, datafile_names[1].c_str());
-	read_init_data_thrust(T_host, pars.N, datafile_names[2].c_str());
+	// This creates thrust arrays by reading Y, F, T from a file
+	read_init_data_thrust(Yf_host, datafile_names[0].c_str());
+	read_init_data_thrust(F_host, datafile_names[1].c_str());
+	read_init_data_thrust(T_host, datafile_names[2].c_str());
 
 	Yf_device = Yf_host;
 	F_device = F_host;
@@ -59,6 +63,8 @@ int main(int argc, char** argv) {
 	///////////////////////////////////////////////////////////////////////////////
 	// Start repeat
 	///////////////////////////////////////////////////////////////////////////////	
+	// I am transferring to using thrust but the fast fcm solver still only takes 
+	// raw pointers, so I need to convert thrust arrays to raw pointers
 
 	/* Create FCM solver */
 	cudaDeviceSynchronize();
@@ -69,6 +75,7 @@ int main(int argc, char** argv) {
 									  thrust::raw_pointer_cast(V_host.data()), 
 									  thrust::raw_pointer_cast(W_host.data()));
 
+	/* Repeat the computation to measure the average computation time */
 	for(int t = 0; t < pars.repeat; t++){
 		if(pars.prompt > 5){
 			std::cout << "\r====Computing repeat " << t+1 << "/" << pars.repeat;
@@ -104,7 +111,7 @@ int main(int argc, char** argv) {
 								  F_validation,
 								  T_validation, 
 								  V_validation, 
-								  W_validation, pars.N, ref_name.c_str());
+								  W_validation, ref_name.c_str());
 
 		Yerror = percentage_error_magnitude_thrust(Yf_host, Y_validation, pars.N);
 		Verror = percentage_error_magnitude_thrust(V_host, V_validation, pars.N);

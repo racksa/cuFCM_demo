@@ -68,10 +68,3 @@ void cufcm_self_correction(Real* V, Real* W, Real* F, Real* T, int N,
                                 Real StokesMob, Real ModStokesMob,
                                 Real PDStokesMob, Real BiLapMob,
                                 Real WT1Mob, Real WT2Mob);
-
-// __global__
-// void cufcm_compute_formula(Real* Y, Real* V, Real* W, Real* F, Real* T, int N,
-//                     Real sigmaFCM, 
-//                     Real sigmaFCMdip,
-//                     Real StokesMob,
-//                     Real WT1Mob);
