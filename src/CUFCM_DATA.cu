@@ -99,9 +99,10 @@ void read_validate_data_thrust(thrust::host_vector<Real>& Y,
     int index = 0;
     while (std::getline(input_file, line)) {
         // Split the line into three space-separated values
+        Real i;
         Real y1, y2, y3, f1, f2, f3, t1, t2, t3, v1, v2, v3, w1, w2, w3;
         std::istringstream iss(line);
-        if(iss >> y1 >> y2 >> y3 >> f1 >> f2 >> f3 >> t1 >> t2 >> t3 >> v1 >> v2 >> v3 >> w1 >> w2 >> w3){
+        if(iss >> i >> y1 >> y2 >> y3 >> f1 >> f2 >> f3 >> t1 >> t2 >> t3 >> v1 >> v2 >> v3 >> w1 >> w2 >> w3){
             // Assign the values to the host vector
             Y[3*index] = y1;
             Y[3*index+1] = y2;
