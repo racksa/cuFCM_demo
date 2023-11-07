@@ -23,17 +23,16 @@ class SIM:
         pardict['dt']=         0.1
         pardict['Fref']=       pardict['rh']
         pardict['packrep']=    1000
-        pardict['boxsize']=    400
+        pardict['boxsize']=    320
 
         self.pars = pardict.copy()
         self.datafiles = filedict.copy()
         self.reference_pars = pardict.copy()
 
-        # self.search_grid_shape = (17, 10, 1, 1) # alpha, beta, eta, npts
-        self.search_grid_shape = (1, 1, 1, 50) # alpha, beta, eta, npts
+        self.search_grid_shape = (3, 3, 3, 3) # alpha, beta, eta, npts
 
         self.nphi = 1
-        self.nn = 5
+        self.nn = 1
         loopshape = (self.nphi, self.nn)
         self.optimal_time_compute_array = np.zeros(loopshape)
         self.optimal_Verror_array = np.zeros(loopshape)
@@ -140,7 +139,7 @@ class SIM:
                     for k in range(self.search_grid_shape[2]):
                         self.pars['alpha']=      1.1 + 0.02*i
                         self.pars['beta']=       (10. + 1*j )
-                        self.pars['eta']=        4.2 #+ np.exp(-8e-6*self.pars['N'])
+                        self.pars['eta']=        4.2 + np.exp(-8e-6*self.pars['N'])
 
                         if(HIsolver==1):
                             npts = min(60 + 10*l, int(self.pars['boxsize']/(self.pars['rh']/np.sqrt(np.pi)) /2)*2 )
