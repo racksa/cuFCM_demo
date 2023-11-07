@@ -17,11 +17,6 @@ data/init_data/*
 data/profiler_data/*
 data/simulation/*
 
-!data/ref_data_N500000_rotation_1e-4.dat
-!data/ref_data_N500000_translate_1e-4.dat
-!data/init_data/new/.gitignore
-!data/simulation/.gitignore
-
 # Unignore all with extensions
 # !*/
 # !*.*
