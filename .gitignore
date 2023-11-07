@@ -13,9 +13,9 @@
 python/__pycache__/*
 bin/*
 other/*
-data/init_data/*
-data/profiler_data/*
-data/simulation/*
+# data/init_data/*
+# data/profiler_data/*
+# data/simulation/*
 
 !.gitignore
 
