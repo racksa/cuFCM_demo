@@ -3,7 +3,7 @@
 A CUDA benchmark for the Fast force-coupling method
 
 ## DOWNLOAD
-Install 'git-lfs' so that the data files in this repo can be downloaded correctly, then download with
+Install `git-lfs` so that the data files in this repo can be downloaded correctly, then download with
 ```
 git lfs clone https://github.com/racksa/cuFCM_demo.git
 ```
