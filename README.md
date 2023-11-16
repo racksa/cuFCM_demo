@@ -15,7 +15,7 @@ make clean x
 ```
 where x is one of the given options in the makefile. The default path of the generated executables are under the repository `/bin/` .
 
-## USAGE
+## USE
 For Imperial College Maths Department users, on the nvidia4 machine, run
 
 ```bash
@@ -36,10 +36,14 @@ Run with
 ```
 where x is the name of the executable binary.
 
-## PYTHON SCRIPT
-A Python script is provided to automatically run sequential simulations using a single binary file. This is achieved by replacing the text in a config file which is then read by the binary file.
+Modify `simulation_info` and run again to see the effects of changing parameters.
 
-> :warning: **The Python script is very custom written and does not run out of the box**: Be very careful here!
+
+## PYTHON SCRIPT
+> :warning: **Do not go to this part if you do not want to perform massive data analysis**
+> :warning: **The Python scripts here are very custom-written and do not run out of the box**
+
+Python scripts are provided an example to automatically run sequential simulations using a single binary file. This is achieved by replacing the text in a config file which is then read by the binary file.
 
 To use that, first change the path in 'settings.py' to match your fast fcm directory path. Create the required directory for data saving. 
 
